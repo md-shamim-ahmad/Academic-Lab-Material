@@ -1,6 +1,3 @@
-# Round Robin Process Scheduling Algorithm
-
-```cpp
 #include <bits/stdc++.h>
 using namespace std;
 struct processor {
@@ -87,4 +84,3 @@ int main() {
     }
     return 0;
 }
-```
