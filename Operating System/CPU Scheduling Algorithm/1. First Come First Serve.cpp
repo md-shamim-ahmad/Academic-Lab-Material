@@ -1,47 +1,55 @@
 #include <bits/stdc++.h>
 using namespace std;
-struct processor {
-    string name; // Processor Name
-    int AT; // Arrtival Time
-    int BT; // Brust Time
-    int CT; // Completion Time
-    int TAT; // Turn Around Time
-    int WT; // Waiting Time
+
+struct items{
+    string name;
+    int index, at, bt, ct, tat, wt;
 };
-void calculate_CompletionTime(vector<processor> &processorList) {
-    processorList[0].CT = processorList[0].AT + processorList[0].BT;
-    for (int i = 1; i < processorList.size(); i++) {
-        processorList[i].CT = (processorList[i].AT <= processorList[i - 1].CT ?
-                processorList[i].BT + processorList[i - 1].CT : processorList[i].BT +processorList[i].AT);
+void CompletionTime(vector<items> &processor) {
+    processor[0].ct = processor[0].at + processor[0].bt;
+    for (int i = 1; i < processor.size(); i++) {
+        processor[i].ct = (processor[i].at <= processor[i - 1].ct ?
+                processor[i - 1].ct + processor[i].bt : processor[i].bt + processor[i].at);
     }
 }
-void calculate_TurnAroundTime(vector<processor> &processorList) {
-    for (auto & processor : processorList)
-        processor.TAT = processor.CT - processor.AT;
+void TurnAroundTime(vector<items> &processor) {
+    for (int i = 0; i < processor.size(); i++) {
+        processor[i].tat = processor[i].ct - processor[i].at;
+    }
 }
-void calculate_WaitingTime(vector<processor> &processorList) {
-    for (auto & processor : processorList)
-        processor.WT = processor.TAT - processor.BT;
+void WaitingTime(vector<items> &processor) {
+    for (int i = 0; i < processor.size(); i++) {
+        processor[i].wt = processor[i].tat - processor[i].bt;
+    }
 }
+void firstComeFirstServe(vector<items> &processor) {
+    sort(processor.begin(), processor.end(), [](items a, items b){
+        return a.at < b.at;
+    });
+    CompletionTime(processor);
+    TurnAroundTime(processor);
+    WaitingTime(processor);
+
+    sort(processor.begin(), processor.end(), [](items a, items b){
+        return a.index < b.index;
+    });
+}
+
 int main() {
     int n;
-    cout << "Enter the number of Processor : ";
+    cout << "Enter the numbe of Processor: ";
     cin >> n;
-    vector<processor> processorList(n);
+    vector<items> processor(n);
     for (int i = 0; i < n; i++) {
-        cout << "Enter the Processor Name : ";
-        cin >> processorList[i].name;
-        cout << "Enter the Processor Arival Time : ";
-        cin >> processorList[i].AT;
-        cout << "Enter the Processor Brust Time : ";
-        cin >> processorList[i].BT;
+        processor[i].index = i;
+        cout << "Enter processor name, arrival time and brust time: ";
+        cin >> processor[i].name >> processor[i].at >> processor[i].bt;
     }
-    calculate_CompletionTime(processorList);
-    calculate_TurnAroundTime(processorList);
-    calculate_WaitingTime(processorList);
-    for (auto &processor: processorList) {
-        cout << processor.name << " " << processor.AT << " " << processor.BT << " " 
-            << processor.CT << " " << processor.TAT << " " << processor.WT << '\n';
+    firstComeFirstServe(processor);
+
+    cout << "name\t at\t bt\t ct\t tat\t wt\n";
+    for (auto it : processor) {
+        cout << it.name << '\t' << it.at << '\t' << it.bt << '\t' <<
+             it.ct << '\t' << it.tat << '\t' << it.wt << '\n';
     }
-    return 0;
 }
