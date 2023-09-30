@@ -5,50 +5,50 @@ struct items{
     string name;
     int index, at, bt, ct, tat, wt;
 };
-void CompletionTime(vector<items> &processor) {
-    processor[0].ct = processor[0].at + processor[0].bt;
-    for (int i = 1; i < processor.size(); i++) {
-        processor[i].ct = (processor[i].at <= processor[i - 1].ct ?
-                processor[i - 1].ct + processor[i].bt : processor[i].bt + processor[i].at);
+void CompletionTime(vector<items> &process) {
+    process[0].ct = process[0].at + process[0].bt;
+    for (int i = 1; i < process.size(); i++) {
+        process[i].ct = (process[i].at <= process[i - 1].ct ?
+                           process[i - 1].ct + process[i].bt : process[i].bt + process[i].at);
     }
 }
-void TurnAroundTime(vector<items> &processor) {
-    for (int i = 0; i < processor.size(); i++) {
-        processor[i].tat = processor[i].ct - processor[i].at;
+void TurnAroundTime(vector<items> &process) {
+    for (int i = 0; i < process.size(); i++) {
+        process[i].tat = process[i].ct - process[i].at;
     }
 }
-void WaitingTime(vector<items> &processor) {
-    for (int i = 0; i < processor.size(); i++) {
-        processor[i].wt = processor[i].tat - processor[i].bt;
+void WaitingTime(vector<items> &process) {
+    for (int i = 0; i < process.size(); i++) {
+        process[i].wt = process[i].tat - process[i].bt;
     }
 }
-void firstComeFirstServe(vector<items> &processor) {
-    sort(processor.begin(), processor.end(), [](items a, items b){
+void firstComeFirstServe(vector<items> &process) {
+    sort(process.begin(), process.end(), [](items a, items b){
         return a.at < b.at;
     });
-    CompletionTime(processor);
-    TurnAroundTime(processor);
-    WaitingTime(processor);
+    CompletionTime(process);
+    TurnAroundTime(process);
+    WaitingTime(process);
 
-    sort(processor.begin(), processor.end(), [](items a, items b){
+    sort(process.begin(), process.end(), [](items a, items b){
         return a.index < b.index;
     });
 }
 
 int main() {
     int n;
-    cout << "Enter the numbe of Processor: ";
+    cout << "Enter the numbe of process: ";
     cin >> n;
-    vector<items> processor(n);
+    vector<items> process(n);
     for (int i = 0; i < n; i++) {
-        processor[i].index = i;
-        cout << "Enter processor name, arrival time and brust time: ";
-        cin >> processor[i].name >> processor[i].at >> processor[i].bt;
+        process[i].index = i;
+        cout << "Enter process name, arrival time and brust time: ";
+        cin >> process[i].name >> process[i].at >> process[i].bt;
     }
-    firstComeFirstServe(processor);
+    firstComeFirstServe(process);
 
     cout << "name\t at\t bt\t ct\t tat\t wt\n";
-    for (auto it : processor) {
+    for (auto it : process) {
         cout << it.name << '\t' << it.at << '\t' << it.bt << '\t' <<
              it.ct << '\t' << it.tat << '\t' << it.wt << '\n';
     }
