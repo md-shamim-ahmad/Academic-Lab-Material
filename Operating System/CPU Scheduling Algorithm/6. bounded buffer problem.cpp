@@ -2,21 +2,21 @@
 
 using namespace std;
 
-const int BUFFER_SIZE = 5;
-const int NUM_PRODUCE = 20;
+int BUFFER_SIZE;
+int NUM_PRODUCE;
 
 queue<int> buffer;
 mutex mtx;
 condition_variable bufferNotFull, bufferNotEmpty;
 
 void producer() {
-    for (int i = 0; i < NUM_PRODUCE; ++i) {
+    for (int i = 0; i < NUM_PRODUCE; i++) {
         unique_lock<mutex> lock(mtx);
-
         // Wait until the buffer is not full
-        bufferNotFull.wait(lock, [] { return buffer.size() < BUFFER_SIZE; });
+        bufferNotFull.wait(lock, []{return buffer.size() < BUFFER_SIZE;});
 
         buffer.push(i);
+
         cout << "Producing: " << i << " (Buffer size: " << buffer.size() << ")" << endl;
 
         lock.unlock();
@@ -25,11 +25,11 @@ void producer() {
 }
 
 void consumer() {
-    for (int i = 0; i < NUM_PRODUCE; ++i) {
+    for (int i = 0; i < NUM_PRODUCE; i++) {
         unique_lock<mutex> lock(mtx);
 
         // Wait until the buffer is not empty
-        bufferNotEmpty.wait(lock, [] { return !buffer.empty(); });
+        bufferNotEmpty.wait(lock, []{return !buffer.empty();});
 
         int item = buffer.front();
         buffer.pop();
@@ -41,6 +41,12 @@ void consumer() {
 }
 
 int main() {
+
+    cout << "Enter buffer size: ";
+    cin >> BUFFER_SIZE;
+    cout << "Enter number of produce: ";
+    cin >> NUM_PRODUCE;
+
     thread producerThread(producer);
     thread consumerThread(consumer);
 
