@@ -1,86 +1,89 @@
 #include <bits/stdc++.h>
 using namespace std;
-struct processor {
-    string name;
-    int arrtivalTime, brustTime, brustRemainingTime, completionTime, turnAroundTime, waitingTime;
-    bool isComplete, inQueue;
-};
 
-void calculateTurnAroundTime(vector<processor> &processorList) {
-    for (auto &processor: processorList)
-        processor.turnAroundTime = processor.completionTime - processor.arrtivalTime;
-}
-void calculateWaitingTime(vector<processor> &processorList) {
-    for (auto &processor: processorList)
-        processor.waitingTime = processor.turnAroundTime - processor.brustTime;
-}
-void checkNewArrivalProcess(vector<processor> &processorList, queue<int> &readyQueue, int &currentTime, int &executedPrograms) {
-    for (int i = 0; i < processorList.size(); i++) {
-        processor p = processorList[i];
-        if (p.arrtivalTime <= currentTime && !p.isComplete && !p.inQueue) {
-            processorList[i].inQueue = true;
+struct items{
+    string name;
+    int index, at, bt, ct, tat, wt, rt;
+    bool complete, enQueue;
+};
+void newArrivalProcess(vector<items> &process, queue<int> &readyQueue, int &currentTime) {
+    for (int i = 0; i < process.size(); i++) {
+        if (!process[i].complete && process[i].at <= currentTime && !process[i].enQueue) {
             readyQueue.push(i);
-            executedPrograms += 1;
+            process[i].enQueue = true;
         }
     }
 }
-void updateQueue(vector<processor> &processorList, queue<int> &readyQueue, int &timeQuantum, int &currentTime, int &executedPrograms) {
+
+void updateProcess(vector<items> &process, queue<int> &readyQueue, int tQ, int &currentTime) {
     int i = readyQueue.front();
     readyQueue.pop();
-    if (processorList[i].brustRemainingTime <= timeQuantum) {
-        processorList[i].isComplete = true;
-        currentTime += processorList[i].brustRemainingTime;
-        processorList[i].completionTime = currentTime;
-        processorList[i].brustRemainingTime = 0;
-        if (executedPrograms != processorList.size()) {
-            checkNewArrivalProcess(processorList, readyQueue, currentTime, executedPrograms);
-        }
-    } else {
-        processorList[i].brustRemainingTime -= timeQuantum;
-        currentTime += timeQuantum;
-        if (executedPrograms != processorList.size()) {
-            checkNewArrivalProcess(processorList, readyQueue, currentTime, executedPrograms);
-        }
+    if (process[i].rt <= tQ) {
+        process[i].complete = true;
+        currentTime += min(process[i].rt, tQ);
+        process[i].rt = 0;
+        process[i].ct = currentTime;
+        newArrivalProcess(process, readyQueue, currentTime);
+    }
+    else {
+        process[i].rt -= tQ;
+        currentTime += tQ;
+        newArrivalProcess(process, readyQueue, currentTime);
         readyQueue.push(i);
     }
 }
-void roundRobin_Algorithm(vector<processor> &processorList, int &timeQuantum) {
-    sort(processorList.begin(), processorList.end(), [](processor &a, processor &b) {
-        return a.arrtivalTime < b.arrtivalTime;
-    });
+void CompletionTime(vector<items> &process, int tQ) {
     queue<int> readyQueue;
     readyQueue.push(0);
-    processorList[0].inQueue = true;
-    int currentTime = 0, executedPrograms = 0;
+    process[0].enQueue = true;
+    int currentTime = 0;
     while (!readyQueue.empty()) {
-        updateQueue(processorList, readyQueue, timeQuantum, currentTime, executedPrograms);
+        updateProcess(process, readyQueue, tQ, currentTime);
     }
 }
-int main() {
-    int n, timeQuantum;
-    cout << "Enter the number of Processor : ";
-    cin >> n;
-    vector<processor> processorList(n);
+void TurnAroundTime(vector<items> &process) {
+    for (int i = 0; i < process.size(); i++) {
+        process[i].tat = process[i].ct - process[i].at;
+    }
+}
+void WaitingTime(vector<items> &process) {
+    for (int i = 0; i < process.size(); i++) {
+        process[i].wt = process[i].tat - process[i].bt;
+    }
+}
+void roundRobin(vector<items> &process, int tQ) {
+    sort(process.begin(), process.end(), [](items a, items b){
+        return a.at < b.at;
+    });
 
+    CompletionTime(process, tQ);
+    TurnAroundTime(process);
+    WaitingTime(process);
+
+    sort(process.begin(), process.end(), [](items a, items b){
+        return a.index < b.index;
+    });
+}
+
+int main() {
+    int n, tQ;
+    cout << "Enter the numbe of process: ";
+    cin >> n;
+    vector<items> process(n);
     for (int i = 0; i < n; i++) {
-        cout << "Enter the Processor Name : ";
-        cin >> processorList[i].name;
-        cout << "Enter the Processor Arival Time : ";
-        cin >> processorList[i].arrtivalTime;
-        cout << "Enter the Processor Brust Time : ";
-        cin >> processorList[i].brustTime;
-        processorList[i].brustRemainingTime = processorList[i].brustTime;
+        process[i].index = i;
+        cout << "Enter process name, arrival time and brust time: ";
+        cin >> process[i].name >> process[i].at >> process[i].bt;
+        process[i].rt = process[i].bt;
     }
     cout << "Enter Time Quantum : ";
-    cin >> timeQuantum;
+    cin >> tQ;
 
-    roundRobin_Algorithm(processorList, timeQuantum);
-    calculateTurnAroundTime(processorList);
-    calculateWaitingTime(processorList);
+    roundRobin(process, tQ);
+
     cout << "name\t at\t bt\t ct\t tat\t wt\n";
-    for (auto &processor: processorList) {
-        cout << processor.name << "\t" << processor.arrtivalTime << "\t" << processor.brustTime << "\t"
-             << processor.completionTime << "\t" << processor.turnAroundTime << "\t" << processor.waitingTime << '\n';
+    for (auto it : process) {
+        cout << it.name << '\t' << it.at << '\t' << it.bt << '\t' <<
+             it.ct << '\t' << it.tat << '\t' << it.wt << '\n';
     }
-    return 0;
 }
