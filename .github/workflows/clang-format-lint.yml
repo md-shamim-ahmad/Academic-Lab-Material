@@ -11,6 +11,6 @@ jobs:
     - uses: actions/checkout@v4
     - uses: DoozyX/clang-format-lint-action@v0.16.2
       with:
-        source: './"Operating System"'
+        source: './'
         extensions: 'cpp'
         clangFormatVersion: 16
